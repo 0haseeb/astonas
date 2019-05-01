@@ -79,7 +79,7 @@ class AnimalController extends Controller
             //Uploads the image
             $path =$request->file('image')->storeAs('public/images', $fileNameToStore);
         } else {
-          // if request has no image set $fileNameToStore to noimage.jpg.
+            // if request has no image set $fileNameToStore to noimage.jpg.
             $fileNameToStore = 'noimage.jpg';
         }
         // create a Animal object and set its values from the input
@@ -180,17 +180,17 @@ class AnimalController extends Controller
      */
     public function adopt($id)
     {
-      //find animal by $id
+        //find animal by $id
         $animal = Animal::find($id);
         //$animal = Animal::select('userid')->where('id', $id)->get();
         // if gate 'accesschk' denies
         if (Gate::denies('accesschk')) {
-          //if animlal is owned by a user
+            //if animlal is owned by a user
             if ($animal->userid != 1) {
                 // generate a redirect HTTP response with a error message
                 return back()->with('error', 'Animal already adopted');
             } else { // if animal is owned by admin
-              // call adoption method and pass it $id
+                // call adoption method and pass it $id
                 $this->adoption($id);
                 return back()->with('success', 'Adoption Request Send, You will recieve this animal if request is aproved');
             }
@@ -200,7 +200,7 @@ class AnimalController extends Controller
         if ($animal->userid == 1) {
             return back()->with('error', 'Animal hasnot been adopted yet');
         } else {// if animal is owned by a user
-          // call adoption method and pass it $id
+            // call adoption method and pass it $id
             $this->adoption($id);
             // generate a redirect HTTP response with a success message
             return back()->with('success', 'You will recieve this animal back once you accept the request');
@@ -234,7 +234,7 @@ class AnimalController extends Controller
      */
     public function destroy($id)
     {
-       // return normal users to home only allow admin
+        // return normal users to home only allow admin
         if (Gate::denies('accesschk')) {
             return view('home');
         }
@@ -266,13 +266,13 @@ class AnimalController extends Controller
      */
     public function showadaptions()
     {
-      // add all adoption requests to $adoptionsQuery
+        // add all adoption requests to $adoptionsQuery
         $adoptionsQuery = Adoption::all();
         // if its a nornal user then only add adoption with user id of logged in user
         if (Gate::denies('accesschk')) {
             $adoptionsQuery=  $adoptionsQuery->where('userid', auth()->user()->id);
         }
-          // generate a redirect HTTP response with $adoptionsQuery array
+        // generate a redirect HTTP response with $adoptionsQuery array
         return view('/showadaptions', array('adoptions'=>  $adoptionsQuery));
     }
 
@@ -283,11 +283,11 @@ class AnimalController extends Controller
      */
     public function showpendingadaptions()
     {
-      // return normal users to home only allow admin
-       if (Gate::denies('accesschk')) {
-           return view('home');
-       }
-       // load all adoptions
+        // return normal users to home only allow admin
+        if (Gate::denies('accesschk')) {
+            return view('home');
+        }
+        // load all adoptions
         $adoptionsQuery = Adoption::all();
         // set $adoptionsQuery to adoption request where status is pending
         $adoptionsQuery=$adoptionsQuery->where('status', 'pending');
@@ -303,7 +303,7 @@ class AnimalController extends Controller
      */
     public function handleadoptionrequest($id)
     {
-      // return normal users to home only allow admin
+        // return normal users to home only allow admin
         if (Gate::denies('accesschk')) {
             return view('home');
         }
@@ -325,7 +325,7 @@ class AnimalController extends Controller
      */
     public function adoptionrequest(Request $request, $id)
     {
-      // return normal users to home only allow admin
+        // return normal users to home only allow admin
         if (Gate::denies('accesschk')) {
             return view('home');
         }
@@ -337,28 +337,37 @@ class AnimalController extends Controller
         $animalid=$adoption->animalid;
         //find animal by $animalid
         $animal = Animal::find($animalid);
-
+        //
         $status = $request->input('status');
+        // if status is denied change the status value to denied in data base record
         if ($status =='denied') {
             $adoption->updated_at = now();
             $adoption->status = $status;
             $adoption->save();
             return redirect('showpendingadaptions')->with('success', 'Adoption Request sucessfully Denied');
         }
+        // if status is approved, change the status value to approved in adoption table record and set userid in animls table to userid of user who requested the adoption
         if ($status =='approved') {
             $adoption->updated_at = now();
             $adoption->status = $status;
             $animal->userid =$userid;
+            if($userid==1){
+              $animal->availability = 'available' ;
+            }else{
+            $animal->availability = 'unavailable' ;
+            }
             $animal->updated_at = now();
+            // save the adoption object
             $adoption->save();
+            // save the animal object
             $animal->save();
             return redirect('showpendingadaptions')->with('success', 'Adoption Request sucessfully Aproved');
         }
+        // if satus is left on pending then show message no change applied
         if ($status =='pending') {
             return redirect('showpendingadaptions')->with('success', 'No Change Made');
         }
     }
-
 
 
     /**
@@ -369,8 +378,11 @@ class AnimalController extends Controller
      */
     public function myanimals()
     {
+      // load all animal
         $animalssQuery = Animal::all();
+        // if gate denis "accesschk" (if its a normal user)
         if (Gate::denies('accesschk')) {
+          // only show animls where field userd is id of loggen in user
             $animalssQuery=$animalssQuery->where('userid', auth()->user()->id);
         }
         return view('/myanimals', array('animals'=>$animalssQuery));
@@ -384,14 +396,15 @@ class AnimalController extends Controller
      */
     public function searchtype(Request $request)
     {
+        // load all animals
         $animalssQuery = Animal::all();
         $this->validate(request(), [
           'type' => 'required',
         ]);
         $type=$request->input('type');
-
+        // put animals with type $type in $animalssQuery
         $animalssQuery=$animalssQuery->where('type', $type) ;
-
+        // generate a redirect HTTP response with $animalssQuery array
         return view('/showavaliable', array('animals'=>$animalssQuery));
     }
     /**
@@ -404,6 +417,7 @@ class AnimalController extends Controller
     {
         $animalssQuery = Animal::all();
         if (Gate::denies('accesschk')) {
+          // show animls where User id = 1 ( show animals which have not been adopted yet)
             $animalssQuery=$animalssQuery->where('userid', 1);
         }
         return view('/showavaliable', array('animals'=>$animalssQuery));

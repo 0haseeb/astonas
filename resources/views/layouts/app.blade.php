@@ -41,13 +41,6 @@
                         <li class="nav-item">
                         <a class="nav-link" href="{{ url('/home') }}">Dashboard </a>
                         </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="{{ url('animals') }}">Show all </a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="{{ url('animals/create') }}">Add New </a>
-                        </li>
-
                         @endguest
 
                     </ul>

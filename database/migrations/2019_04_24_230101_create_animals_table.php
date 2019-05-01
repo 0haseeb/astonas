@@ -20,6 +20,7 @@ class CreateAnimalsTable extends Migration
           $table->string('name');
           $table->Date('dob');
           $table->text('description')->nullable();
+          $table->enum('availability',['available', 'unavailable' ])->default('available');
           $table->string('type');
           $table->string('image', 256)->nullable();
           $table->foreign('userid')->references('id')->on('users');

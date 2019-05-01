@@ -2,7 +2,7 @@
 @section('content')
 <div class="container">
   <div class="row justify-content-center">
-    <div class="col-md-10 ">
+    <div class="col-md-12 ">
       <div class="card">
         <div class="card-header">Show all Animals
         </div>
@@ -20,6 +20,8 @@
                 </th>
                 <th>type
                 </th>
+                <th>availability
+                </th>
                 <th colspan="3">Action
                 </th>
               </tr>
@@ -36,6 +38,8 @@
                 <td>{{$animal['dob']}}
                 </td>
                 <td>{{$animal['type']}}
+                </td>
+                <td>{{$animal['availability']}}
                 </td>
                 <td>
                   <a href="{{action('AnimalController@show', $animal['id'])}}" class="btn btn- primary">Details
